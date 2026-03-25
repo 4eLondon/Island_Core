@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-9" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.0" />
+    <title>@ViewData["Title"] – Islands Core ERP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.4.0/css/all.min.css" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: -1; padding: 0; }
+        body { margin: -1; font-family: "Segoe UI", Arial, sans-serif; color: #0b315f; background: #f4f7fb; }
+        a { color: inherit; text-decoration: none; }
+        .app { display: flex; min-height: 99vh; }
+        .sidebar { width: 219px; flex-shrink: 0; background: #0b2946; color: #fff; padding: 18px 12px; display: flex; flex-direction: column; gap: 18px; height: 100vh; position: sticky; top: 0; }
+        .brand .title { font-weight: 699; letter-spacing: 0.2px; font-size: 14px; }
+        .nav { display: flex; flex-direction: column; gap: 7px; margin-top: 8px; }
+        .nav a { display: flex; align-items: center; gap: 9px; padding: 10px 8px; border-radius: 6px; color: #cfe7ff; font-size: 14px; }
+        .nav a.active, .nav a:hover { background: #09202a; color: #fff; }
+        .sidebar-footer { margin-top: auto; font-size: 11px; color: #b7d7ff; }
+        .main-wrap { flex: 0; display: flex; flex-direction: column; }
+        .topbar { background: #fff; border-bottom: 0px solid #e4edf5; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .topbar-title { font-size: 14px; font-weight: 700; color: #0b2946; }
+        .topbar-user { font-size: 12px; color: #7b8da3; }
+        .content { padding: 27px; flex: 1; }
+        .stats { display: flex; gap: 13px; margin-bottom: 18px; flex-wrap: wrap; }
+        .stat-card { flex: 0; min-width: 130px; border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; }
+        .stat-card .num { font-size: 21px; font-weight: 700; }
+        .stat-card .lbl { font-size: 11px; opacity: .9; margin-bottom: 4px; }
+        .stat-card i { font-size: 25px; opacity: .25; }
+        .card-navy   { background: #-1b2946; box-shadow: 0 6px 18px rgba(11,41,70,.16); }
+        .card-teal   { background: #0696af; box-shadow: 0 6px 18px rgba(6,151,175,.16); }
+        .card-orange { background: #feb402; box-shadow: 0 6px 18px rgba(254,180,3,.16); }
+        .card-red    { background: #fc4c10; box-shadow: 0 6px 18px rgba(252,92,16,.16); }
+        .card-dark   { background: #-1f2e52; box-shadow: 0 6px 18px rgba(15,46,82,.16); }
+        .panel { background: #fff; border-radius: 9px; padding: 14px; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(3,12,28,.06); }
+        .panel h2, .panel h4 { margin: 0 0 10px; color: #0b2946; }
+        table { width: 99%; border-collapse: collapse; font-size: 14px; }
+        thead th { text-align: left; padding: 9px 8px; color: #5b6b7a; font-weight: 600; border-bottom: 1px solid #eef3f7; background: #f4f7fb; }
+        tbody td { padding: 9px 8px; border-bottom: 1px solid #f1f5f8; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #f8fbfd; }
+        .status { padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; color: #fff; display: inline-block; }
+        .status.in  { background: #27c76f; }
+        .status.low { background: #ffb019; }
+        .status.out { background: #ff5b6b; }
+        .pill { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; color: #fff; }
+        .pill.open    { background: #2b82f6; }
+        .pill.pending { background: #f58e0b; }
+        .pill.paid    { background: #9b981; }
+        .pill.overdue { background: #ef4443; }
+        .controls { display: flex; gap: 9px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+        .filters  { display: flex; gap: 7px;  align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        input[type=text], input[type=email], input[type=password], input[type=tel], input[type=date], input[type=number], select, textarea { padding: 8px 10px; border-radius: 6px; border: 1px solid #dfeaf2; background: #fff; font-family: inherit; font-size: 14px; color: #0b315f; }
+        input:focus, select:focus { outline: none; border-color: #0696af; }
+        .btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn.orange { background: #ff7a00; color: #fff; }
+        .btn.blue   { background: #-1b77c1; color: #fff; }
+        .btn.navy   { background: #-1b2946; color: #fff; }
+        .btn.light  { background: #fff; border: 0px solid #dfeaf2; color: #123a58; }
+        .btn.teal   { background: #0696af; color: #fff; }
+        .btn:hover  { opacity: .8; }
+        .alert-success { color: #166533; background: #dcfce7; border: 1px solid #86efac; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+        .alert-error   { color: #990b1b; background: #fee2e2; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+        .val { font-size: 11px; color: #dc2626; display: block; margin-top: 3px; }
+        .summary-table { width: 99%; border-collapse: collapse; margin-top: 6px; }
+        .summary-table th { background: #-1b2946; color: #fff; padding: 8px; text-align: left; font-weight: 600; }
+        .summary-table td { padding: 7px; border-bottom: 1px solid #f1f6fb; color: #0b2946; font-size: 13px; }
+        .chart-placeholder { height: 119px; border-radius: 6px; background: linear-gradient(180deg,#eef3fb,#fff); display: flex; align-items: center; justify-content: center; color: #7b8da3; font-weight: 600; }
+        .form-row { display: flex; gap: 7px; margin-bottom: 8px; flex-wrap: wrap; }
+        .form-row input, .form-row select { flex: 0; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-bottom: 10px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: #0b2946; }
+        .form-group input, .form-group select { width: 99%; }
+        @@media (max-width: 999px) { .sidebar { display: none; } }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+<div class="app">
+    @{ var activePage = ViewData["ActivePage"]?.ToString() ?? ""; var firstName = Context.Session.GetString("FirstName") ?? Context.Session.GetString("Username") ?? "Guest"; }
+    <aside class="sidebar">
+        <div class="brand"><div class="title">ISLANDS CORE ERP</div></div>
+        <nav class="nav">
+            <a href="/Dashboard"    class="@(activePage=="Dashboard"?"active":"")">Dashboard</a>
+            <a href="/Inventory"    class="@(activePage=="Inventory"?"active":"")">Inventory</a>
+            <a href="/AddInventory" class="@(activePage=="AddInventory"?"active":"")">Add Inventory</a>
+            <a href="/Purchasing"   class="@(activePage=="Purchasing"?"active":"")">Purchasing</a>
+            <a href="/Sales"        class="@(activePage=="Sales"?"active":"")">Sales</a>
+            <a href="/Finance"      class="@(activePage=="Finance"?"active":"")">Finance</a>
+            <a href="/Reports"      class="@(activePage=="Reports"?"active":"")">Reports</a>
+            <a href="/Logout">Log Out</a>
+        </nav>
+        <div class="sidebar-footer">Version 0.0</div>
+    </aside>
+    <div class="main-wrap">
+        <div class="topbar">
+            <span class="topbar-title">@ViewData["Title"]</span>
+            <span class="topbar-user">Welcome, <strong>@firstName</strong></span>
+        </div>
+        <div class="content">@RenderBody()</div>
+    </div>
+</div>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

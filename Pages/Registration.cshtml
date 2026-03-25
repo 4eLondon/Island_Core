@@ -1,0 +1,103 @@
+@page
+@model IslandCore.Pages.RegistrationModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Registration – Islands Core ERP</title>
+    <style>
+        body { background-color: white; color: darkblue; font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; }
+        .site-header { text-align:center; margin:12px 0; }
+        .site-header h1 { font-size:18px; color:#0b2946; margin:6px 0 0; }
+        .page-center { width:100%; max-width:760px; margin:20px auto; text-align:center; padding-bottom:40px; }
+        .form-box { display:inline-block; width:520px; text-align:left; border:1px solid #ccc; padding:20px; border-radius:6px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+        table.form-table { width:100%; border-collapse:collapse; }
+        table.form-table tr td:first-child { width:160px; text-align:right; padding-right:14px; vertical-align:middle; padding:6px 14px 6px 0; }
+        table.form-table tr td:last-child { text-align:left; padding:6px 0; }
+        .form-box input[type=text], .form-box input[type=password], .form-box select { width:280px; box-sizing:border-box; padding:6px 8px; border:1px solid #cfcfcf; border-radius:4px; font-family:inherit; color:inherit; }
+        input[type=submit], button[type=submit] { padding:6px 14px; border:1px solid #aaa; border-radius:4px; background:#f0f0f0; cursor:pointer; font-family:inherit; }
+        .btn-link { color:teal; font-weight:600; }
+        .val { font-size:12px; color:#dc2626; display:block; margin-top:2px; }
+        .alert-success { color:#166534; background:#dcfce7; border:1px solid #86efac; padding:8px 12px; border-radius:4px; margin-bottom:12px; font-size:14px; }
+        .alert-error   { color:#991b1b; background:#fee2e2; border:1px solid #fca5a5; padding:8px 12px; border-radius:4px; margin-bottom:12px; font-size:14px; }
+        .radio-row { display:flex; gap:16px; margin-top:4px; }
+        .radio-row label { display:flex; align-items:center; gap:5px; font-weight:400; }
+    </style>
+</head>
+<body>
+<div class="site-header">
+    <h1>ISLANDS CORE ERP</h1>
+</div>
+<div class="page-center">
+    <div class="form-box">
+        <h2 style="text-align:center; margin:0 0 16px;">Register</h2>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="@(Model.IsSuccess ? "alert-success" : "alert-error")">@Model.StatusMessage</div>
+        }
+
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <td><label asp-for="Input.FirstName">First Name:</label></td>
+                    <td><input asp-for="Input.FirstName" maxlength="100"/><span asp-validation-for="Input.FirstName" class="val"></span></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.LastName">Last Name:</label></td>
+                    <td><input asp-for="Input.LastName" maxlength="100"/></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.Email">Email:</label></td>
+                    <td><input asp-for="Input.Email" type="email" maxlength="256"/><span asp-validation-for="Input.Email" class="val"></span></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.Telephone">Telephone:</label></td>
+                    <td><input asp-for="Input.Telephone" maxlength="20"/></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.City">City:</label></td>
+                    <td>
+                        <select asp-for="Input.City">
+                            <option value="">-- Select --</option>
+                            @foreach (var p in Model.Parishes) { <option>@p</option> }
+                        </select>
+                        <span asp-validation-for="Input.City" class="val"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>Gender:</label></td>
+                    <td>
+                        <div class="radio-row">
+                            <label><input type="radio" asp-for="Input.Gender" value="Male"/> Male</label>
+                            <label><input type="radio" asp-for="Input.Gender" value="Female"/> Female</label>
+                            <label><input type="radio" asp-for="Input.Gender" value="Other"/> Other</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.Username">Username:</label></td>
+                    <td><input asp-for="Input.Username" maxlength="50"/><span asp-validation-for="Input.Username" class="val"></span></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.Password">Password:</label></td>
+                    <td><input asp-for="Input.Password" type="password" maxlength="100"/><span asp-validation-for="Input.Password" class="val"></span></td>
+                </tr>
+                <tr>
+                    <td><label asp-for="Input.ConfirmPassword">Confirm Password:</label></td>
+                    <td><input asp-for="Input.ConfirmPassword" type="password" maxlength="100"/><span asp-validation-for="Input.ConfirmPassword" class="val"></span></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="padding-top:10px;">
+                        <input type="submit" value="Submit"/>
+                        &nbsp;&nbsp;
+                        <a href="/Login" class="btn-link">Login</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>

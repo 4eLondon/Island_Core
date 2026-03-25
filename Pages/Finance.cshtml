@@ -1,0 +1,116 @@
+@page
+@model IslandCore.Pages.FinanceModel
+@{
+    ViewData["Title"] = "Finance";
+    ViewData["ActivePage"] = "Finance";
+}
+
+<div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">@Model.TotalRevenue.ToString("C0")</div></div>
+    <div class="kpi"><div class="kpi-label">Gross Margin</div><div class="kpi-value">@Model.GrossMarginPct.ToString("0.0")%</div></div>
+    <div class="kpi"><div class="kpi-label">Net Cash Flow</div><div class="kpi-value">@Model.NetCashFlow.ToString("C0")</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Invoice Age</div><div class="kpi-value">@Model.DSO days</div></div>
+    <div class="kpi"><div class="kpi-label">Overdue Invoices</div><div class="kpi-value">@Model.OverdueCount</div></div>
+    <div class="kpi"><div class="kpi-label">Cash Low?</div><div class="kpi-value" style="font-size:18px;">@(Model.IsLowCash ? "Yes ⚠️" : "No ✓")</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+    <div class="card">
+        <div class="card-title">Revenue by Category</div>
+        @if (!Model.RevenueByCategory.Any())
+        {
+            <div class="chart-placeholder">No revenue data</div>
+        }
+        else
+        {
+            var max = Model.RevenueByCategory.Max(x => x.Revenue);
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:8px;">
+                @foreach (var g in Model.RevenueByCategory)
+                {
+                    var pct = max == 0 ? 0 : (double)g.Revenue / max * 100;
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:110px;font-size:13px;color:#0b2946;">@g.Category</div>
+                        <div style="flex:1;background:#eef5ff;height:24px;border-radius:4px;overflow:hidden;">
+                            <div style="height:100%;width:@pct.ToString("0.##")%;background:#2563eb;"></div>
+                        </div>
+                        <div style="width:80px;text-align:right;font-weight:600;font-size:13px;">@g.Revenue.ToString("C0")</div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-title">Cost Breakdown by Category</div>
+        @if (!Model.CostByCategory.Any())
+        {
+            <div class="chart-placeholder">No cost data</div>
+        }
+        else
+        {
+            var total = Model.CostByCategory.Sum(x => x.Cost);
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                @foreach (var g in Model.CostByCategory)
+                {
+                    var pct = total == 0 ? 0 : (double)g.Cost / total * 100;
+                    <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;">
+                        <span>@g.Category</span>
+                        <span style="font-weight:600;">@g.Cost.ToString("C0") <span style="color:#6b7f95;font-weight:400;">(@pct.ToString("0.#")%)</span></span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-title">Accounts Payable (by Supplier)</div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Supplier</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.AP)
+                    {
+                        var cls = r.Status.Contains("Paid", StringComparison.OrdinalIgnoreCase) ? "paid"
+                                : r.Status.Contains("Over", StringComparison.OrdinalIgnoreCase) ? "overdue" : "pending";
+                        <tr>
+                            <td>@r.Supplier</td>
+                            <td style="font-weight:600;">@r.Amount.ToString("C0")</td>
+                            <td><span class="pill @cls">@r.Status</span></td>
+                        </tr>
+                    }
+                    @if (!Model.AP.Any()) { <tr><td colspan="3" style="color:#6b7f95;text-align:center;padding:16px;">No data</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Accounts Receivable (by Customer)</div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.AR)
+                    {
+                        var cls = r.Status == "Open" ? "open" : r.Status == "Overdue" ? "overdue" : "pending";
+                        <tr>
+                            <td>@r.Customer</td>
+                            <td style="font-weight:600;">@r.Amount.ToString("C0")</td>
+                            <td><span class="pill @cls">@r.Status</span></td>
+                        </tr>
+                    }
+                    @if (!Model.AR.Any()) { <tr><td colspan="3" style="color:#6b7f95;text-align:center;padding:16px;">No data</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <form method="post" asp-page-handler="ExportCsv">
+            <div class="card-title">Export Finance Summary</div>
+            <p style="font-size:13px;color:#6b7f95;margin-bottom:16px;">Download AP/AR summary as CSV.</p>
+            <button type="submit" class="btn btn-primary">Download CSV</button>
+        </form>
+    </div>
+</div>

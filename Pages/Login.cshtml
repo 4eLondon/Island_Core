@@ -1,0 +1,66 @@
+@page
+@model IslandCore.Pages.LoginModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Login – Islands Core ERP</title>
+    <style>
+        body { background-color: white; color: darkblue; font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; }
+        .site-header { text-align:center; margin:24px 0 12px; }
+        .site-header h1 { font-size:20px; color:#0b2946; margin:8px 0 0; }
+        .page-center { width:100%; max-width:760px; margin:20px auto; text-align:center; }
+        .form-box { display:inline-block; width:420px; text-align:left; border:1px solid #ccc; padding:24px; border-radius:6px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+        table { margin:0 auto; }
+        td { padding:6px 5px; vertical-align:middle; }
+        td:first-child { text-align:right; padding-right:14px; width:120px; }
+        input[type=text], input[type=password] { width:220px; padding:6px 8px; border:1px solid #cfcfcf; border-radius:4px; font-family:inherit; }
+        input[type=submit], button { padding:6px 14px; border:1px solid #aaa; border-radius:4px; background:#f0f0f0; cursor:pointer; font-family:inherit; }
+        .register-link { color:teal; font-weight:600; }
+        .alert-error { color:#991b1b; background:#fee2e2; border:1px solid #fca5a5; padding:8px 12px; border-radius:4px; margin-bottom:12px; font-size:14px; }
+        .val { font-size:12px; color:#dc2626; display:block; }
+    </style>
+</head>
+<body>
+    <div class="site-header">
+        <h1>ISLANDS CORE ERP</h1>
+    </div>
+    <div class="page-center">
+        <div class="form-box">
+            <h2 style="text-align:center; margin:0 0 16px;">Login</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert-error">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <table>
+                    <tr>
+                        <td><label asp-for="Input.Username">Username:</label></td>
+                        <td>
+                            <input asp-for="Input.Username" maxlength="50"/>
+                            <span asp-validation-for="Input.Username" class="val"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label asp-for="Input.Password">Password:</label></td>
+                        <td>
+                            <input asp-for="Input.Password" type="password" maxlength="100"/>
+                            <span asp-validation-for="Input.Password" class="val"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding-top:10px;">
+                            <input type="submit" value="Submit"/>
+                            &nbsp;&nbsp;
+                            <a href="/Registration" class="register-link">Register</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

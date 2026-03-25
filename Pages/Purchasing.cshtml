@@ -1,0 +1,104 @@
+@page
+@model IslandCore.Pages.PurchasingModel
+@{
+    ViewData["Title"] = "Purchasing";
+    ViewData["ActivePage"] = "Purchasing";
+}
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+    <div class="card">
+        <div class="card-title">Inventory</div>
+        <form method="get" class="filter-bar" style="margin-bottom:16px;">
+            <div class="form-group">
+                <label>Search</label>
+                <input type="text" name="search" value="@Model.Search" placeholder="SKU or product…"/>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c" selected="@(Model.CategoryFilter==c)">@c</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Supplier</label>
+                <select name="supplier" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    @foreach (var s in Model.Suppliers)
+                    {
+                        <option value="@s" selected="@(Model.SupplierFilter==s)">@s</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+            <a href="/Purchasing" class="btn btn-ghost btn-sm">Clear</a>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>SKU</th><th>Product</th><th>Category</th><th>Stock</th><th>Cost/Unit</th><th>Total</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model.Items)
+                    {
+                        var cls = i.Stock <= 0 ? "out" : i.Stock <= i.ReorderLevel ? "low" : "in";
+                        var lbl = DataService.ComputeStatus(i.Stock, i.ReorderLevel);
+                        <tr>
+                            <td><code>@i.SKU</code></td>
+                            <td>@i.ProductName</td>
+                            <td>@i.Category</td>
+                            <td>@i.Stock</td>
+                            <td>@i.CostPerUnit.ToString("C0")</td>
+                            <td>@i.TotalOrderCost.ToString("C0")</td>
+                            <td><span class="pill @cls">@lbl</span></td>
+                        </tr>
+                    }
+                    @if (!Model.Items.Any())
+                    {
+                        <tr><td colspan="7" style="text-align:center;color:#6b7f95;padding:24px;">No items</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">New Purchase</div>
+
+        @if (!string.IsNullOrEmpty(Model.PurchaseMessage))
+        {
+            <div class="alert @(Model.PurchaseSuccess ? "alert-success" : "alert-error")">@Model.PurchaseMessage</div>
+        }
+
+        <form method="post">
+            <div class="form-group" style="margin-bottom:16px;">
+                <label asp-for="Purchase.Customer">Customer Name</label>
+                <input asp-for="Purchase.Customer"/>
+                <span asp-validation-for="Purchase.Customer" style="font-size:12px;color:#dc2626;"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label asp-for="Purchase.SKU">Product</label>
+                <select asp-for="Purchase.SKU">
+                    <option value="">-- Select --</option>
+                    @foreach (var i in Model.AllItems)
+                    {
+                        <option value="@i.SKU">@i.SKU – @i.ProductName (@i.Stock in stock)</option>
+                    }
+                </select>
+                <span asp-validation-for="Purchase.SKU" style="font-size:12px;color:#dc2626;"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label asp-for="Purchase.Quantity">Quantity</label>
+                <input asp-for="Purchase.Quantity" type="number" min="1" value="1"/>
+                <span asp-validation-for="Purchase.Quantity" style="font-size:12px;color:#dc2626;"></span>
+            </div>
+            <button type="submit" class="btn btn-teal" style="width:100%;">Confirm Purchase</button>
+        </form>
+    </div>
+
+</div>

@@ -1,0 +1,139 @@
+@page
+@model IslandCore.Pages.AddInventoryModel
+@{
+    ViewData["Title"] = "Manage Inventory";
+    ViewData["ActivePage"] = "AddInventory";
+}
+
+<div style="display:flex; gap:24px; align-items:flex-start;">
+
+    <!-- Left: item list -->
+    <div style="flex:1;">
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0;">Inventory Items</h3>
+                <form method="get" style="display:flex; gap:8px;">
+                    <input type="text" name="Search" value="@Model.Search" placeholder="Search SKU or product…" style="width:220px;"/>
+                    <button type="submit" class="btn light">Search</button>
+                    <a href="/AddInventory" class="btn light">Clear</a>
+                </form>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                <div class="@(Model.IsSuccess ? "alert-success" : "alert-error")" style="margin-bottom:12px;">@Model.StatusMessage</div>
+            }
+
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SKU / Product</th><th>Category</th><th>Stock</th>
+                            <th>Reorder</th><th>Supplier</th><th>Cost/Unit</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model.Items)
+                        {
+                            var cls = i.Stock <= 0 ? "out" : i.Stock <= i.ReorderLevel ? "low" : "in";
+                            var lbl = DataService.ComputeStatus(i.Stock, i.ReorderLevel);
+                            <tr>
+                                <td>
+                                    <strong>@i.ProductName</strong><br/>
+                                    <small style="color:#90a3ae;">@i.SKU</small>
+                                </td>
+                                <td>@i.Category</td>
+                                <td>@i.Stock</td>
+                                <td>@i.ReorderLevel</td>
+                                <td>@i.Supplier</td>
+                                <td>@i.CostPerUnit.ToString("C0")</td>
+                                <td><span class="status @cls">@lbl</span></td>
+                                <td style="white-space:nowrap;">
+                                    <a href="/AddInventory?EditSku=@Uri.EscapeDataString(i.SKU)" class="btn light" style="padding:5px 10px; font-size:12px;">Edit</a>
+                                    <form method="post" asp-page-handler="Delete" style="display:inline;"
+                                          onsubmit="return confirm('Delete @i.ProductName?');">
+                                        <input type="hidden" name="sku" value="@i.SKU"/>
+                                        <button type="submit" class="btn light" style="padding:5px 10px; font-size:12px; color:#dc2626;">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Items.Any())
+                        {
+                            <tr><td colspan="8" style="text-align:center;color:#6b7f95;padding:32px;">No items found</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: add/edit form -->
+    <div style="width:320px; flex-shrink:0;">
+        <div class="panel">
+            <h4>@(Model.Input.IsEdit ? $"Edit: {Model.Input.SKU}" : "Add New Item")</h4>
+
+            <form method="post" asp-page-handler="Save">
+                <input type="hidden" asp-for="Input.IsEdit"/>
+
+                <div class="form-row">
+                    <input asp-for="Input.SKU" placeholder="SKU" readonly="@Model.Input.IsEdit" />
+                    <input asp-for="Input.ProductName" placeholder="Product Name"/>
+                </div>
+                <span asp-validation-for="Input.SKU" style="font-size:12px;color:#dc2626;display:block;margin-bottom:4px;"></span>
+                <span asp-validation-for="Input.ProductName" style="font-size:12px;color:#dc2626;display:block;margin-bottom:4px;"></span>
+
+                <div class="form-row">
+                    <input asp-for="Input.Category" placeholder="Category"/>
+                    <input asp-for="Input.Supplier"  placeholder="Supplier"/>
+                </div>
+
+                <div class="form-row">
+                    <input asp-for="Input.Stock"        type="number" min="0" placeholder="Stock"/>
+                    <input asp-for="Input.ReorderLevel" type="number" min="0" placeholder="Reorder Level"/>
+                </div>
+
+                <div class="form-row">
+                    <input asp-for="Input.CostPerUnit" type="number" min="0" placeholder="Cost Per Unit"/>
+                    <select asp-for="Input.Status">
+                        <option>In Stock</option>
+                        <option>Low Stock</option>
+                        <option>Out of Stock</option>
+                        <option>Pending</option>
+                        <option>Paid</option>
+                    </select>
+                </div>
+                <span asp-validation-for="Input.CostPerUnit" style="font-size:12px;color:#dc2626;display:block;margin-bottom:6px;"></span>
+
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button type="submit" class="btn orange">@(Model.Input.IsEdit ? "Update" : "Save")</button>
+                    <a href="/AddInventory" class="btn light">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h4>Low Stock</h4>
+            @{
+                var lowItems = Model.Items.Where(i => i.Stock <= i.ReorderLevel).OrderBy(i => i.Stock).Take(5).ToList();
+            }
+            @if (!lowItems.Any())
+            {
+                <div style="color:#6b7f95;font-size:13px;">No low stock items</div>
+            }
+            else
+            {
+                <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+                    @foreach (var i in lowItems)
+                    {
+                        <li style="display:flex;justify-content:space-between;font-size:13px;">
+                            <span>@i.ProductName</span>
+                            <span class="status @(i.Stock <= 0 ? "out" : "low")" style="padding:2px 8px;font-size:11px;">@i.Stock</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+</div>
